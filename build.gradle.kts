@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "com.s1ckret.labs"
-version = "1.0-SNAPSHOT"
+version = "0.0.1"
 
 repositories {
     mavenCentral()
@@ -25,5 +25,5 @@ tasks.withType<KotlinCompile> {
 }
 
 application {
-    mainClass.set("MainKt")
+    mainClass.set("com.s1ckret.labs.MainKt")
 }
