@@ -1,8 +1,8 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jetbrains.kotlin.konan.target.Family
+import org.jetbrains.kotlin.konan.target.HostManager
 
 plugins {
-    kotlin("jvm") version "1.7.10"
-    application
+    kotlin("multiplatform") version "1.7.10"
 }
 
 group = "com.s1ckret.labs"
@@ -12,45 +12,38 @@ repositories {
     mavenCentral()
 }
 
-dependencies {
-    implementation("com.github.ajalt.clikt:clikt:3.5.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.6.4")
-    implementation("io.arrow-kt:arrow-core:1.1.2")
-    testImplementation(kotlin("test"))
-}
-
-tasks.test {
-    useJUnitPlatform()
-}
-
-tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "1.8"
-}
-
-application {
-    mainClass.set("com.s1ckret.labs.MainKt")
-}
-
-val uberJar = tasks.register<Jar>("uberJar") {
-    this.group = "build"
-    this.duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    archiveClassifier.set("uber")
-
-    manifest {
-        attributes["Main-Class"] = application.mainClass
+kotlin {
+    val hostOs = System.getProperty("os.name")
+    val osName = when {
+        HostManager.hostIsLinux -> Family.LINUX
+        HostManager.hostIsMac -> Family.IOS
+        HostManager.hostIsMingw -> Family.MINGW
+        else -> error("unknown host")
     }
 
-    from(sourceSets.main.get().output)
+    if (HostManager.hostIsLinux) linuxX64()
+    if (HostManager.hostIsMac) macosX64()
+    if (HostManager.hostIsMingw) mingwX64()
 
-    dependsOn(configurations.runtimeClasspath)
-    from({
-        configurations.runtimeClasspath.get().filter { it.name.endsWith("jar") }.map { zipTree(it) }
-    })
-    with(tasks.jar.get() as CopySpec)
-}
-
-tasks {
-    "build" {
-        dependsOn(uberJar)
+    jvm {
+        withJava()
+        compilations.all {
+            kotlinOptions.jvmTarget = "1.8"
+        }
+    }
+    sourceSets {
+        val commonMain by getting {
+            dependencies {
+                implementation(kotlin("stdlib-common"))
+                implementation("com.github.ajalt.clikt:clikt:3.5.0")
+            }
+        }
+        val commonTest by getting
+        val jvmMain by getting {
+            dependencies {
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.3")
+            }
+        }
+        val jvmTest by getting
     }
 }
