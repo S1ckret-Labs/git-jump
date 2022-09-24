@@ -3,6 +3,7 @@ import org.jetbrains.kotlin.konan.target.HostManager
 
 plugins {
     kotlin("multiplatform") version "1.7.10"
+    application
 }
 
 group = "com.s1ckret.labs"
@@ -45,5 +46,20 @@ kotlin {
             }
         }
         val jvmTest by getting
+    }
+}
+
+application {
+    mainClass.set("com.s1ckret.labs.gitj.MainKt")
+}
+
+distributions {
+    main {
+        contents {
+            from("$buildDir/libs") {
+                rename("${rootProject.name}-jvm", rootProject.name)
+                into("lib")
+            }
+        }
     }
 }
