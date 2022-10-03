@@ -37,6 +37,7 @@ kotlin {
             dependencies {
                 implementation(kotlin("stdlib-common"))
                 implementation("com.github.ajalt.clikt:clikt:3.5.0")
+                implementation("io.arrow-kt:arrow-core:1.1.2")
             }
         }
         val commonTest by getting
